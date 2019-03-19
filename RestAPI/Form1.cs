@@ -14,6 +14,8 @@ using System.Net.Http.Headers;
 using System.IO;
 using RestSharp;
 
+// http://restsharp.org/
+
 namespace RestAPI
 {
     public partial class Form1 : Form
@@ -45,6 +47,31 @@ namespace RestAPI
             //    Console.WriteLine(response.Data.Name);
             //});
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var client = new RestClient("https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=age,gender");
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("Postman-Token", "537a3f97-f213-4937-b383-94712ebd4974");
+            request.AddHeader("cache-control", "no-cache");
+            request.AddHeader("Ocp-Apim-Subscription-Key", "3122cabdd3314337be175e365f579cbb");
+            request.AddHeader("Content-Type", "application/octet-stream");
+            //request.AddHeader("Content-Type", "iamge/jpeg");
+            byte[] data = File.ReadAllBytes(@"e:\Delme\DragonFromRussia.jpg");
+            var body = new Parameter
+            {
+                Name = "file",
+                Value = data,
+                Type = ParameterType.RequestBody,
+            };
+            request.Parameters.Add(body);
+
+            //request.AddFile("Face Image", @"e:\Delme\DragonFromRussia.jpg");
+            IRestResponse response = client.Execute(request);
+            
+            Console.WriteLine(response.Content.ToString());
+            //ByteArrayContent
         }
     }
 }
