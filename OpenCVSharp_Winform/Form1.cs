@@ -64,7 +64,7 @@ namespace OpenCVSharp_Winform
             int expectedProcessTimePerFrame = 1000 / fps;
             Stopwatch st = new Stopwatch();
             st.Start();
-
+            int cnt = 0;
             using (Mat image = new Mat())
             {
                 while (true)
@@ -76,6 +76,8 @@ namespace OpenCVSharp_Winform
                     {
                         break;
                     }
+                    string fname = string.Format("test{0:D3}.jpg", cnt++);
+                    image.ImWrite(fname);
 
                     _q.Add(BitmapConverter.ToBitmap(image));
                     //this.Invoke((Action)(() => this.Invalidate()));
