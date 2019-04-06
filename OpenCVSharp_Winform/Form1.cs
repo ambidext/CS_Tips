@@ -46,11 +46,9 @@ namespace OpenCVSharp_Winform
             //}
         }
 
-        BlockingCollection<Bitmap> _q = new BlockingCollection<Bitmap>();
-
-        private Thread camera;
-
-        private void CaptureCameraCallback()
+        BlockingCollection<Bitmap> bcBitmap = new BlockingCollection<Bitmap>();
+        Thread videoThread;
+        void CaptureCameraCallback()
         {
             VideoCapture capture = new VideoCapture(@"e:\Temp\test.mp4");
 
@@ -64,7 +62,7 @@ namespace OpenCVSharp_Winform
             int expectedProcessTimePerFrame = 1000 / fps;
             Stopwatch st = new Stopwatch();
             st.Start();
-            int cnt = 0;
+            int cnt = 0;    // for save image file name
             using (Mat image = new Mat())
             {
                 while (true)
@@ -76,11 +74,10 @@ namespace OpenCVSharp_Winform
                     {
                         break;
                     }
-                    string fname = string.Format("test{0:D3}.jpg", cnt++);
-                    image.ImWrite(fname);
+                    string fname = string.Format("test{0:D3}.jpg", cnt++);  // for save image 
+                    image.ImWrite(fname);   // for save image
 
-                    _q.Add(BitmapConverter.ToBitmap(image));
-                    //this.Invoke((Action)(() => this.Invalidate()));
+                    bcBitmap.Add(BitmapConverter.ToBitmap(image));
                     pictureBox1.Invoke((Action)(() => pictureBox1.Invalidate()));
                     int elapsed = (int)(st.ElapsedMilliseconds - started);
                     int delay = expectedProcessTimePerFrame - elapsed;
@@ -95,9 +92,9 @@ namespace OpenCVSharp_Winform
 
         private void button1_Click(object sender, EventArgs e)
         {
-            camera = new Thread(CaptureCameraCallback);
-            camera.IsBackground = true;
-            camera.Start();
+            videoThread = new Thread(CaptureCameraCallback);
+            videoThread.IsBackground = true;
+            videoThread.Start();
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -107,7 +104,7 @@ namespace OpenCVSharp_Winform
             Bitmap item;
             while (true)
             {
-                if (_q.TryTake(out item) == true)
+                if (bcBitmap.TryTake(out item) == true)
                 {
                     g.DrawImage(item, new PointF(0, 0));
                     item.Dispose();
